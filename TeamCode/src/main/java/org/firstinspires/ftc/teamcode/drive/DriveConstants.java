@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.drive;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.trajectory.constraints.DriveConstraints;
 import com.qualcomm.hardware.motors.NeveRest20Gearmotor;
+import com.qualcomm.hardware.motors.RevRobotics20HdHexMotor;
+import com.qualcomm.hardware.motors.RevRobotics40HdHexMotor;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 /*
@@ -18,13 +20,26 @@ public class DriveConstants {
      * adjust them in the dashboard; **config variable changes don't persist between app restarts**.
      */
 
-    /*
-     * Warning: The ticks per revolution in RevRobotics20HdHexMotor and RevRobotics40HdHexMotor are
-     * double the actual values (see https://github.com/ftctechnh/ftc_app/issues/713). For now, if
-     * you use these motors, divide the TICKS_PER_REV value by 2.
-     */
-    private static final MotorConfigurationType MOTOR_CONFIG =
-            MotorConfigurationType.getMotorType(NeveRest20Gearmotor.class);
+    private static final Class<?> MOTOR_TYPE = RevRobotics20HdHexMotor.class;
+
+    private static final MotorConfigurationType MOTOR_CONFIG;
+
+    static {
+        MOTOR_CONFIG = MotorConfigurationType.getMotorType(MOTOR_TYPE);
+
+        // Fix known error in FTC hardware library in v4.3 of FTC app
+        // See https://github.com/ftctechnh/ftc_app/issues/713
+        // These two types of motor incorrectly have encoder ticks per revolution set to double the correct value
+
+        if (MOTOR_TYPE == RevRobotics20HdHexMotor.class) {
+            MOTOR_CONFIG.setTicksPerRev(560);
+        }
+
+        if (MOTOR_TYPE == RevRobotics40HdHexMotor.class) {
+            MOTOR_CONFIG.setTicksPerRev(1120);
+        }
+    }
+
     private static final double TICKS_PER_REV = MOTOR_CONFIG.getTicksPerRev();
 
     public static double WHEEL_RADIUS = 2; // in
